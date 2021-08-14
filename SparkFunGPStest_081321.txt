@@ -1,0 +1,84 @@
+SparkFun GPS Test
+=================
+8-13-21, P. Mathys
+
+Materials:
+----------
+
+* Sparkfun  GPS-15733  $69.95
+  SparkFun GPS Breakout - NEO-M9N, Chip Antenna (Qwiic)
+* Sparkfun  DEV-15123  $19.95
+  SparkFun RedBoard Qwiic
+* Sparkfun  PRT-14427   $1.50
+  Qwiic Cable - 100mm
+* Sparkfun  CAB-10215   $4.95
+  USB micro-B Cable - 6 Foot
+
+
+Test Setup
+----------
+
+* GPS Breakout module connected to RedBoard (Arduino Uno) via Qwiic Cable
+  RedBoard connected to Windows PC via USB cable
+
+
+Software
+--------
+
+* Use Arduino IDE
+  Check for CH340 Driver:
+  - Open Device Manager
+  - Click on Ports (COM & LPT)
+  - Check for USB-SERIAL CH340 (COMx)  where x is a number
+* Under Tools and Board select "Arduino Uno"
+  Under Tools and Board select "COMx"  wher x is the same number as above
+* Use (modified) blink example to test uploading
+  void setup() {
+    // put your setup code here, to run once:
+    pinMode(LED_BUILTIN, OUTPUT);
+  }
+
+  void loop() {
+    // put your main code here, to run repeatedly:
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(500);
+  }
+* Go to Arduino Library Manager
+  Search for "SparkFun u-blox GNSS Arduino Library" and install it
+  Go to Arduino Library Manager
+  Search for "MicroNMEA" by Steve Marple and install it
+* Upload and run this code (NMEAParsing) on the RedBoard Qwiic (Arduino Uno):
+  #include <Wire.h> //Needed for I2C to GPS
+
+  #include "SparkFun_u-blox_GNSS_Arduino_Library.h" //Click here to get the library: http://librarymanager/All#SparkFun_u-blox_GNSS
+  SFE_UBLOX_GNSS myGNSS;
+
+  void setup()
+  {
+    Serial.begin(115200);
+    Serial.println("SparkFun u-blox Example");
+
+    Wire.begin();
+
+    if (myGNSS.begin() == false)
+    {
+      Serial.println(F("u-blox GNSS module not detected at default I2C address. Please check wiring. Freezing."));
+      while (1);
+    }
+
+    //This will pipe all NMEA sentences to the serial port so we can see them
+    myGNSS.setNMEAOutputPort(Serial);
+  }
+
+  void loop()
+  {
+    myGNSS.checkUblox(); //See if new data is available. Process bytes as they come in.
+
+    delay(250); //Don't pound too hard on the I2C bus
+  }
+* Start the Serial Monitor (under Tools). Mak sure to set the baud rate to 115200 baud
+  Otherwise the output will be garbled: ⸮⸮⸮⸮t⸮Q⸮r0⸮0⸮4⸮⸮⸮⸮�
+
+
